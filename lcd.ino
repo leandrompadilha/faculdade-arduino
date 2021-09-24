@@ -1,59 +1,67 @@
 // Bibliotecas------------------------------------------------------------------
-#include <Wire.h> ///////////////////////////////// Permite comunicação com I2C 
-#include <LiquidCrystal_I2C.h> ///////////////////////////////// Controla o LCD 
-#include <RTClib.h> //////////////////////////// Controla o sensor de Tempo Real
-#include <DHT.h> ///////////////////// Controla sensor de temperatura e humidade
-#include <Keypad.h> ///////////////////////////////////////// Controla o teclado
+#include <Wire.h>              // Permite comunicação com I2C
+#include <LiquidCrystal_I2C.h> // Controla o LCD
+#include <RTClib.h>            // Controla o sensor de Tempo Real
+#include <DHT.h>               // Controla sensor de temperatura e humidade
+#include <Keypad.h>            // Controla o teclado
 //------------------------------------------------------------------------------
 
 // Pinos------------------------------------------------------------------------
-#define DHTPIN 2 ///////////////////////////////////////////////////////////////
-#define DHTTYPE DHT11 //////////////////////////////////////////////////////////
-#define button 3 ///////////////////////////////////////////////////////////////
-#define vib 4 //////////////////////////////////////////////////////////////////
-#define buz 5 //////////////////////////////////////////////////////////////////
+#define DHTPIN 2
+#define DHTTYPE DHT11
+#define button 3
+#define vib 4
+#define buz 5
 //------------------------------------------------------------------------------
 
-// Setup objeto teclado---------------------------------------------------------
-char mapaTeclas[4] [3] = {{'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'}, {'*', '0', '#'}};
-byte pinos_linha[4] = {6,7,8,9};
-byte pinos_coluna[3] = {10,11,12};
-Keypad teclado = Keypad(makeKeymap(mapaTeclas), pinos_linha, pinos_coluna,4,3);
+// Setup de variáveis para o objeto teclado-------------------------------------
+char mapaTeclas[4][3] = {{'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'}, {'*', '0', '#'}};
+byte pino_linha[4] = {6, 7, 8, 9};
+byte pino_coluna[3] = {10, 11, 12};
+Keypad teclado = Keypad(makeKeymap(mapaTeclas), pino_linha, pino_coluna, 4, 3);
+//------------------------------------------------------------------------------
 
-// Setup data e botão-----------------------------------------------------------
-char daysOfTheWeek[7][12] = {"DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"};//
-int buttonState = 0; ///////////////////////////////////////////////////////////
+// Setup de variáveis para data e botão-----------------------------------------
+char daysOfTheWeek[7][12] = {"DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"};
+int buttonState = 0;
+//------------------------------------------------------------------------------
+
+// Setup de variáveis para controle do despertador------------------------------
+//bool inicio = false; // Variáveis de controle
+//bool final = false;
 //------------------------------------------------------------------------------
 
 // Objetos----------------------------------------------------------------------
-LiquidCrystal_I2C lcd(0x27, 20, 4); ////////////////////////////////////////////
-RTC_DS1307 rtc; ////////////////////////////////////////////////////////////////
-DHT dht(DHTPIN, DHTTYPE); //////////////////////////////////////////////////////
+LiquidCrystal_I2C lcd(0x27, 20, 4);
+RTC_DS1307 rtc;
+DHT dht(DHTPIN, DHTTYPE);
 //------------------------------------------------------------------------------
 
 // Setup------------------------------------------------------------------------
 void setup()
 {
   // Inicialização do sistema --------------------------------------------------
-  if (! rtc.begin()) {
+  if (!rtc.begin())
+  {
     Serial.println("Couldn't find RTC");
     Serial.flush();
     abort();
   }
 
-  if (! rtc.isrunning()) {
+  if (!rtc.isrunning())
+  {
     Serial.println("RTC is NOT running, let's set the time!");
   }
-  Serial.begin(9600);  
+  Serial.begin(9600);
   dht.begin();
   lcd.init();
   lcd.backlight();
-  
+
   // Declaração de Pinos--------------------------------------------------------
   pinMode(vib, OUTPUT);
   pinMode(button, INPUT);
   pinMode(buz, OUTPUT);
-  
+
   // Mensagem inicial ----------------------------------------------------------
   digitalWrite(buz, HIGH);
   delay(100);
@@ -66,49 +74,41 @@ void setup()
   lcd.print(F("- Despertador -"));
   delay(3000);
   lcd.clear();
-
-  for (int i = 0; i < 10; i++)
-    {
-      relogio();
-      lcd.backlight();
-      delay(1000);
-    } 
-  lcd.noBacklight();
-  lcd.clear();
 }
 
-// Loop-------------------------------------------------------------------------
+// Loop-----------------------------------------------------------------------
 void loop()
 {
-
   char tecla = teclado.getKey();
+  relogio();
 
-  if (tecla != NO_KEY) {
-    for (int i = 0; i < 15; i++)
+  hibInicio();
+
+  if (tecla != NO_KEY)
+  {
+    unsigned long int tempoAnterior2 = 0;
+    if (millis() - tempoAnterior2 >= 3000)
     {
-      relogio();
       lcd.backlight();
-      delay(1000);
-    } 
-  }
-  else {
-    lcd.noBacklight();
+      tec();
+    }
   }
 }
 
 // Funções----------------------------------------------------------------------
-void relogio() 
+void relogio()
 {
   // Config sensor de tempo
   DateTime now = rtc.now();
-  //lcd.setBacklight(HIGH); 
+  //lcd.setBacklight(HIGH);
 
   // Config sensor de humidade e temperatura
   float h = dht.readHumidity();
   // Temperature em Celsius (default)
   float t = dht.readTemperature();
 
-  if (isnan(h) || isnan(t)) {
+  if (isnan(h) || isnan(t))
+  {
     Serial.println(F("Falha de leitura do sensor DHT!"));
     return;
   }
@@ -132,7 +132,7 @@ void relogio()
   lcd.print(now.minute(), DEC);
   lcd.print(':');
   lcd.print(now.second(), DEC);
-  
+
   lcd.setCursor(0, 2);
   lcd.print(F("Humidade: "));
   lcd.setCursor(10, 2);
@@ -150,7 +150,7 @@ void relogio()
   //lcd.write(32);  // Caracter espaço
 }
 
-void botao() 
+void botao()
 {
   buttonState = digitalRead(button);
   if (buttonState == HIGH)
@@ -158,12 +158,27 @@ void botao()
     digitalWrite(vib, HIGH);
   }
   else
-  digitalWrite(vib, LOW);  
+    digitalWrite(vib, LOW);
 }
 
+void tec()
+{
+  if (tecla != NO_KEY)
+  {
+    Serial.print(tecla)
+  }
+}
 
+void hibInicio()
+{
+  unsigned long int tempoAnterior = 0;
+  if (millis() - tempoAnterior >= 15000)
+  {
+    lcd.noBacklight();
+  }
+}
 
-void bip() 
+void bip()
 {
   digitalWrite(buz, HIGH);
   delay(100);
@@ -178,22 +193,22 @@ void bip()
   digitalWrite(buz, HIGH);
   delay(100);
   digitalWrite(buz, LOW);
-  delay(50);  
+  delay(50);
 
   digitalWrite(buz, HIGH);
   delay(100);
   digitalWrite(buz, LOW);
-  delay(250);  
+  delay(250);
 
   digitalWrite(buz, HIGH);
   delay(100);
   digitalWrite(buz, LOW);
-  delay(550);  
+  delay(550);
 
   digitalWrite(buz, HIGH);
   delay(100);
   digitalWrite(buz, LOW);
-  delay(220);  
+  delay(220);
 
   digitalWrite(buz, HIGH);
   delay(100);
