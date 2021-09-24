@@ -1,0 +1,13 @@
+{
+    "cSpell.ignoreWords": [
+        "Celcius",
+        "IDDHTLIB",
+        "isrunning",
+        "println"
+    ],
+    "cSpell.words": [
+        "DHTPIN",
+        "DHTTYPE"
+    ],
+    "C_Cpp.errorSquiggles": "Disabled"
+}
