@@ -63,10 +63,10 @@ void setup()
   pinMode(buz, OUTPUT);
 
   // Mensagem inicial ----------------------------------------------------------
-  digitalWrite(buz, HIGH);
+  /*digitalWrite(buz, HIGH);
   delay(100);
-  digitalWrite(buz, LOW);
-  //bip();
+  digitalWrite(buz, LOW);*/
+  bip();
 
   lcd.setCursor(5, 1);
   lcd.print(F("- Relogio -"));
@@ -79,13 +79,15 @@ void setup()
   {
     relogio();
     delay(1000);
-  }  
+  }
 }
 
 // Loop-----------------------------------------------------------------------
 void loop()
 {
   hibernar();
+  digito();
+  botao();
 }
 
 // Funções----------------------------------------------------------------------
@@ -216,5 +218,14 @@ void hibernar()
   {
     lcd.noBacklight();
     lcd.noDisplay();
+  }
+}
+
+void digito()
+{
+  char tecla = teclado.getKey();
+  if (tecla != NO_KEY)
+  {
+    Serial.print(tecla);
   }
 }
