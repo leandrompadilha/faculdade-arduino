@@ -74,25 +74,18 @@ void setup()
   lcd.print(F("- Despertador -"));
   delay(3000);
   lcd.clear();
+
+  for (int i = 0; i < 10; i++)
+  {
+    relogio();
+    delay(1000);
+  }  
 }
 
 // Loop-----------------------------------------------------------------------
 void loop()
 {
-  char tecla = teclado.getKey();
-  relogio();
-
-  hibInicio();
-
-  if (tecla != NO_KEY)
-  {
-    unsigned long int tempoAnterior2 = 0;
-    if (millis() - tempoAnterior2 >= 3000)
-    {
-      lcd.backlight();
-      tec();
-    }
-  }
+  hibernar();
 }
 
 // Funções----------------------------------------------------------------------
@@ -161,23 +154,6 @@ void botao()
     digitalWrite(vib, LOW);
 }
 
-void tec()
-{
-  if (tecla != NO_KEY)
-  {
-    Serial.print(tecla)
-  }
-}
-
-void hibInicio()
-{
-  unsigned long int tempoAnterior = 0;
-  if (millis() - tempoAnterior >= 15000)
-  {
-    lcd.noBacklight();
-  }
-}
-
 void bip()
 {
   digitalWrite(buz, HIGH);
@@ -213,4 +189,32 @@ void bip()
   digitalWrite(buz, HIGH);
   delay(100);
   digitalWrite(buz, LOW);
+}
+
+void hibernar()
+{
+  lcd.noDisplay();
+  lcd.noBacklight();
+
+  char tecla = teclado.getKey();
+
+  if (tecla != NO_KEY)
+  {
+    for (int i = 0; i < 10; i++)
+    {
+      relogio();
+      lcd.display();
+      lcd.backlight();
+      delay(1000);
+      if (tecla != NO_KEY)
+      {
+        continue;
+      }
+    }
+  }
+  else
+  {
+    lcd.noBacklight();
+    lcd.noDisplay();
+  }
 }
