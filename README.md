@@ -1,6 +1,4 @@
-# Projeto Arduíno
-
-Projeto acadêmico
+# Projeto acadêmico Arduíno
 
 Criação de um despertador digital utilizando:
 - 01 Arduíno
